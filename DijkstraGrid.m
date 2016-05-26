@@ -38,6 +38,7 @@ drawMapEveryTime = true;
 [nrows, ncols] = size(input_map);
 
 % map - a table that keeps track of the state of each grid cell
+global map;
 map = zeros(nrows,ncols);
 
 map(~input_map) = 1;   % Mark free cells
@@ -51,9 +52,11 @@ map(start_node) = 5;
 map(dest_node)  = 6;
 
 % Initialize distance array
+global distanceFromStart;
 distanceFromStart = Inf(nrows,ncols);
 
 % For each grid cell this array holds the index of its parent
+global parent;
 parent = zeros(nrows,ncols);
 
 distanceFromStart(start_node) = 0;
@@ -100,35 +103,19 @@ while true
     % Generate linear indices of neighbor
     if(i+1 <= nrows)
         neighbor1 = sub2ind(size(map), i+1, j);
-        if((map(neighbor1) ~= 2 && map(neighbor1) ~= 3 && map(neighbor1) ~= 5) && (distanceFromStart(neighbor1)>distanceFromStart(current)+1))
-            distanceFromStart(neighbor1)=distanceFromStart(current)+1;
-            parent(neighbor1) = current;
-            map(neighbor1)=4;
-        end
+        addNeighbor(current, neighbor1);
     end
     if(i-1 > 0)
         neighbor2 = sub2ind(size(map), i-1, j);
-        if((map(neighbor2) ~= 2 && map(neighbor2) ~= 3 && map(neighbor2) ~= 5) && (distanceFromStart(neighbor2)>distanceFromStart(current)+1))
-            distanceFromStart(neighbor2)=distanceFromStart(current)+1;
-            parent(neighbor2) = current;
-            map(neighbor2)=4;
-        end
+        addNeighbor(current, neighbor2);
     end
     if(j+1 <= ncols)
         neighbor3 = sub2ind(size(map), i, j+1);
-        if((map(neighbor3) ~= 2 && map(neighbor3) ~= 3 && map(neighbor3) ~= 5) && (distanceFromStart(neighbor3)>distanceFromStart(current)+1))
-            distanceFromStart(neighbor3)=distanceFromStart(current)+1;
-            parent(neighbor3) = current;
-            map(neighbor3)=4;
-        end
+        addNeighbor(current, neighbor3);
     end
     if(j-1 > 0)
         neighbor4 = sub2ind(size(map), i, j-1);
-        if((map(neighbor4) ~= 2 && map(neighbor4) ~= 3 && map(neighbor4) ~= 5) && (distanceFromStart(neighbor4)>distanceFromStart(current)+1))
-            distanceFromStart(neighbor4)=distanceFromStart(current)+1;
-            parent(neighbor4) = current;
-            map(neighbor4)=4;
-        end
+        addNeighbor(current, neighbor4);
     end
     distanceFromStart(current) = Inf; % remove this node from further consideration
     %*********************************************************************
@@ -155,4 +142,15 @@ else
     end
 end
 
+end
+
+function addNeighbor (current,neighbor)
+    global map;
+    global parent;
+    global distanceFromStart;
+    if((map(neighbor) ~= 2 && map(neighbor) ~= 3 && map(neighbor) ~= 5) && (distanceFromStart(neighbor)>distanceFromStart(current)+1))
+        distanceFromStart(neighbor)=distanceFromStart(current)+1;
+        parent(neighbor) = current;
+        map(neighbor)=4;
+    end
 end

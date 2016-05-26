@@ -37,6 +37,7 @@ drawMapEveryTime = true;
 [nrows, ncols] = size(input_map);
 
 % map - a table that keeps track of the state of each grid cell
+global map;
 map = zeros(nrows,ncols);
 
 map(~input_map) = 1;   % Mark free cells
@@ -52,6 +53,7 @@ map(dest_node)  = 6;
 % meshgrid will `replicate grid vectors' nrows and ncols to produce
 % a full grid
 % type `help meshgrid' in the Matlab command prompt for more information
+global parent;
 parent = zeros(nrows,ncols);
 
 % 
@@ -62,9 +64,12 @@ yd = dest_coords(2);
 
 % Evaluate Heuristic function, H, for each grid cell
 % Manhattan distance
+global H;
 H = abs(X - xd) + abs(Y - yd);
 H = H';
 % Initialize cost arrays
+global f;
+global g;
 f = Inf(nrows,ncols);
 g = Inf(nrows,ncols);
 
@@ -113,43 +118,23 @@ while true
     numExpanded = numExpanded + 1;
     if(i+1 <= nrows)
         neighbor1 = sub2ind(size(map), i+1, j);
-        if((map(neighbor1) ~= 2 && map(neighbor1) ~= 3) && (g(neighbor1)>g(current)+1))
-            g(neighbor1)=g(current)+1;
-            f(neighbor1) = g(neighbor1) + H(neighbor1);
-            parent(neighbor1) = current;
-            map(neighbor1)=4;
-        end
+        addNeighbor (current,neighbor1);
     end
     
     if(i-1 > 0)
         neighbor2 = sub2ind(size(map), i-1, j);
-        if((map(neighbor2) ~= 2 && map(neighbor2) ~= 3) && (g(neighbor2)>g(current)+1))
-            g(neighbor2)=g(current)+1;
-            f(neighbor2) = g(neighbor2) + H(neighbor2);
-            parent(neighbor2) = current;
-            map(neighbor2)=4;
-        end
+        addNeighbor (current,neighbor2);
     end
     
     if(j-1 > 0)
         neighbor3 = sub2ind(size(map), i, j-1);
-        if((map(neighbor3) ~= 2 && map(neighbor3) ~= 3) && (g(neighbor3)>g(current)+1))
-            g(neighbor3)=g(current)+1;
-            f(neighbor3) = g(neighbor3) + H(neighbor3);
-            parent(neighbor3) = current;
-            map(neighbor3)=4;
-        end
+        addNeighbor (current,neighbor3);
     end
     
     
     if(j+1 <= nrows)
         neighbor4 = sub2ind(size(map), i, j+1);
-        if((map(neighbor4) ~= 2 && map(neighbor4) ~= 3) && (g(neighbor4)>g(current)+1))
-            g(neighbor4)=g(current)+1;
-            f(neighbor4) = g(neighbor4) + H(neighbor4);
-            parent(neighbor4) = current;
-            map(neighbor4)=4;
-        end
+        addNeighbor (current,neighbor4);
     end
     
     
@@ -179,4 +164,18 @@ else
     end
 end
 
+end
+
+function addNeighbor (current,neighbor)
+    global map;
+    global parent;
+    global g;
+    global f;
+    global H;
+    if((map(neighbor) ~= 2 && map(neighbor) ~= 3) && (g(neighbor)>g(current)+1))
+        g(neighbor)=g(current)+1;
+        f(neighbor) = g(neighbor) + H(neighbor);
+        parent(neighbor) = current;
+        map(neighbor)=4;
+    end
 end
